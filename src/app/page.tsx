@@ -13,9 +13,9 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div className="p-[1%]">
+      {/* <div className="p-[1%]"> */}
         {showAllProducts ? <ViewAllProducts /> : <SingleProduct />}
-      </div>
+      {/* </div> */}
       <Footer />
     </>
   );
