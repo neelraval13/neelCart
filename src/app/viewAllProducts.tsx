@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'; // Import the magnifying glass icon
+import StarRating from '@/components/StarRating'; // Reuse StarRating component
 
 interface Rating {
   rate: number;
@@ -25,6 +26,8 @@ export default function ViewAllProducts() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRating, setSelectedRating] = useState<number>(0); // Rating filter state
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortAlpha, setSortAlpha] = useState(false); // State for sorting alphabetically
+  const [sortPrice, setSortPrice] = useState(false); // State for sorting by price
   const productsPerPage = 6;
 
   useEffect(() => {
@@ -58,8 +61,33 @@ export default function ViewAllProducts() {
     setCurrentPage(1); // Reset to the first page when filters change
   };
 
+  // Handle sorting logic
+  const handleSortAlpha = () => {
+    setSortAlpha(true);
+    setSortPrice(false);
+  };
+
+  const handleSortPrice = () => {
+    setSortPrice(true);
+    setSortAlpha(false);
+  };
+
+  // Apply sorting based on user selection
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortAlpha && sortPrice) {
+      // Sort alphabetically first, then by price
+      return a.title.localeCompare(b.title) || a.price - b.price;
+    } else if (sortAlpha) {
+      return a.title.localeCompare(b.title);
+    } else if (sortPrice) {
+      return a.price - b.price;
+    } else {
+      return a.id - b.id; // Default sorting by ID
+    }
+  });
+
   // Filter products based on selected categories and rating
-  const filteredProducts = products.filter(
+  const filteredProducts = sortedProducts.filter(
     (product) =>
       selectedCategories.includes(product.category) &&
       product.rating.rate >= selectedRating
@@ -90,13 +118,29 @@ export default function ViewAllProducts() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">All Products</h2>
-          <div className="relative">
-            <input
-              type="text"
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Search products..."
-            />
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+          <div className="relative flex items-center justify-between w-full max-w-lg">
+            <div className="relative flex-grow">
+              <input
+                type="text"
+                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search products..."
+              />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
+            </div>
+            <div className="flex space-x-4 ml-4 whitespace-nowrap">
+              <button
+                onClick={handleSortAlpha}
+                className={`text-gray-500 ${sortAlpha ? 'text-blue-500 underline' : ''}`}
+              >
+                A - Z
+              </button>
+              <button
+                onClick={handleSortPrice}
+                className={`text-gray-500 ${sortPrice ? 'text-blue-500 underline' : ''}`}
+              >
+                Price: low to high
+              </button>
+            </div>
           </div>
         </div>
         
@@ -139,7 +183,10 @@ export default function ViewAllProducts() {
                         onChange={() => handleRatingChange(rating)}
                         className="form-radio h-5 w-5 text-blue-600"
                       />
-                      <span className="ml-2 text-gray-700 dark:text-gray-300">{rating} star & up</span>
+                      <div className="flex items-center ml-2">
+                        <StarRating rating={rating} /> {/* Reuse the StarRating component */}
+                        <span className="ml-2 text-gray-700 dark:text-gray-300"> & up</span> {/* Add "& up" text */}
+                      </div>
                     </label>
                   </div>
                 ))}
@@ -152,7 +199,8 @@ export default function ViewAllProducts() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               {currentProducts.map((product) => (
                 <ProductCard
-                  key={product.id}
+                  key={product.id} // Unique key for each product
+                  id={product.id}  // Pass the id prop to ProductCard
                   title={product.title}
                   image={product.image}
                   price={product.price}
