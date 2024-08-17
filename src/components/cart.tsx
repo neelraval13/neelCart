@@ -75,7 +75,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
             ))}
 
             {/* Discount Code Pills */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex justify-center flex-wrap gap-2 mb-4">
               {['dscntcode1', 'dscntcode2', 'dscntcode3', 'code9', 'code8'].map((code) => (
                 <button
                   key={code}
